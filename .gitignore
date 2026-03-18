@@ -1,0 +1,15 @@
+# Ignore the saved images directory as it contains large binary files
+offline/saved-images/
+*.tar
+
+# Ignore generated offline k8s manifests
+k8s-offline/
+
+# Ignore sensitive information (though we used placeholders, it's a good practice)
+# If you have real passwords in 01-config.yaml, you might want to ignore it
+# and create a 01-config.example.yaml instead.
+# k8s/01-config.yaml
+
+# OS generated files
+.DS_Store
+Thumbs.db

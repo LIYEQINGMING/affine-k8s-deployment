@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: affine
+  namespace: affine
+  labels:
+    app: affine
+    component: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: affine
+      component: server
+  template:
+    metadata:
+      labels:
+        app: affine
+        component: server
+    spec:
+      imagePullSecrets:
+        - name: harbor-registry-secret
+      nodeSelector:
+        kubernetes.io/os: linux
+      initContainers:
+        - name: migration
+          image: ghcr.io/toeverything/affine:stable
+          command: ['sh', '-c', 'node ./scripts/self-host-predeploy.js']
+          env:
+            - name: REDIS_SERVER_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: affine-config
+                  key: REDIS_SERVER_HOST
+            - name: DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: affine-config
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: affine-secret
+                  key: DB_PASSWORD
+            - name: DB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: affine-config
+                  key: DB_DATABASE
+            - name: DATABASE_URL
+              value: "postgresql://$(DB_USERNAME):$(DB_PASSWORD)@affine-postgres:5432/$(DB_DATABASE)"
+            - name: AFFINE_INDEXER_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: affine-config
+                  key: AFFINE_INDEXER_ENABLED
+          volumeMounts:
+            - name: storage
+              mountPath: /root/.affine/storage
+            - name: config
+              mountPath: /root/.affine/config
+      containers:
+        - name: affine
+          image: ghcr.io/toeverything/affine:stable
+          ports:
+            - containerPort: 3010
+          env:
+            - name: REDIS_SERVER_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: affine-config
+                  key: REDIS_SERVER_HOST
+            - name: DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: affine-config
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: affine-secret
+                  key: DB_PASSWORD
+            - name: DB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: affine-config
+                  key: DB_DATABASE
+            - name: DATABASE_URL
+              value: "postgresql://$(DB_USERNAME):$(DB_PASSWORD)@affine-postgres:5432/$(DB_DATABASE)"
+            - name: AFFINE_INDEXER_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: affine-config
+                  key: AFFINE_INDEXER_ENABLED
+          volumeMounts:
+            - name: storage
+              mountPath: /root/.affine/storage
+            - name: config
+              mountPath: /root/.affine/config
+          # livenessProbe:
+          #   httpGet:
+          #     path: /api/health # Adjust if there is a specific health endpoint
+          #     port: 3010
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 10
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: affine-storage-pvc
+        - name: config
+          persistentVolumeClaim:
+            claimName: affine-config-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: affine
+  namespace: affine
+  labels:
+    app: affine
+    component: server
+spec:
+  type: NodePort
+  ports:
+    - port: 3010
+      targetPort: 3010
+      nodePort: 30010
+  selector:
+    app: affine
+    component: server

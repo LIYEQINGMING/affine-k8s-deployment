@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: affine-postgres
+  namespace: affine
+  labels:
+    app: affine
+    component: postgres
+spec:
+  serviceName: "affine-postgres"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: affine
+      component: postgres
+  template:
+    metadata:
+      labels:
+        app: affine
+        component: postgres
+    spec:
+      imagePullSecrets:
+        - name: harbor-registry-secret
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: postgres
+          image: pgvector/pgvector:pg16
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: affine-config
+                  key: DB_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: affine-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: affine-config
+                  key: DB_DATABASE
+            - name: POSTGRES_INITDB_ARGS
+              value: "--data-checksums"
+            # In production, use password authentication.
+            # Here we follow docker-compose but use password if set.
+            # POSTGRES_HOST_AUTH_METHOD: trust 
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "$(POSTGRES_USER)", "-d", "$(POSTGRES_DB)"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "$(POSTGRES_USER)", "-d", "$(POSTGRES_DB)"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: affine-postgres-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: affine-postgres
+  namespace: affine
+  labels:
+    app: affine
+    component: postgres
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: affine
+    component: postgres
+  clusterIP: None # Headless service for StatefulSet

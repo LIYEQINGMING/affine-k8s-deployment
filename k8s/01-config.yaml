@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: affine-config
+  namespace: affine
+  labels:
+    app: affine
+data:
+  # AFFiNE configuration
+  AFFINE_REVISION: "stable"
+  AFFINE_INDEXER_ENABLED: "false"
+  # Redis configuration
+  REDIS_SERVER_HOST: "affine-redis"
+  # Database configuration
+  DB_USERNAME: "affine"
+  DB_DATABASE: "affine"
+  # Server configuration
+  PORT: "3010"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: affine-secret
+  namespace: affine
+  labels:
+    app: affine
+type: Opaque
+stringData:
+  # CHANGE THESE VALUES IN PRODUCTION
+  DB_PASSWORD: "secure_password_here"
+  POSTGRES_PASSWORD: "secure_password_here"
