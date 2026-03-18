@@ -1,7 +1,3 @@
-<div align="center">
-  <img src="https://github.com/toeverything/AFFiNE/raw/master/.github/assets/affine-logo-white.svg" alt="AFFiNE Logo" width="200" />
-</div>
-
 <p align="center">
   <a href="/README.md">English</a>
   | 
@@ -14,24 +10,26 @@
 
 <b>This repository provides a complete set of Kubernetes manifests and offline deployment scripts for self-hosting AFFiNE (an open-source, all-in-one workspace). It supports both standard online deployment and air-gapped (offline) environments.</b>
 
-<br>
+<br />
 
 ✨ Simplify your self-hosted AFFiNE deployment on Kubernetes
 
-<br>
+<br />
 
 # 💌 Why we created this deployment guide
+
 While AFFiNE provides an excellent Docker Compose guide, deploying it to a production Kubernetes cluster, especially in an air-gapped (offline) environment, requires significant effort. This repository bridges that gap by providing a production-ready Kubernetes setup with offline image management support.
 
-<br>
+<br />
 
 # ✨ Quick Start
 
 <a href="k8s/README.md">Online Deployment Guide</a> | <a href="offline/README.md">Offline Deployment Guide</a>
 
-<br>
+<br />
 
 # 🔥 Features
+
 <table>
   <tr>
     <th>
@@ -67,15 +65,16 @@ While AFFiNE provides an excellent Docker Compose guide, deploying it to a produ
   </tr>
 </table>
 
-<br>
+<br />
 
 # 💌 About AFFiNE
+
 To learn more about the AFFiNE application itself, please visit the official repositories:
 
-- Official Website: [https://affine.pro](https://affine.pro)
+- Official Website: <https://affine.pro>
 - GitHub Repository: [toeverything/AFFiNE](https://github.com/toeverything/AFFiNE)
-- Official Documentation: [https://docs.affine.pro](https://docs.affine.pro)
+- Official Documentation: <https://docs.affine.pro>
 
-<br>
+<br />
 
 🙏 Thanks to the AFFiNE team for creating such a wonderful workspace tool! This deployment repository aims to make it easier for Kubernetes users to adopt and host their own instances. 🎉
