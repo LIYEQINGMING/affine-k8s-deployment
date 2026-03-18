@@ -1,7 +1,3 @@
-<div align="center">
-  <img src="https://github.com/toeverything/AFFiNE/raw/master/.github/assets/affine-logo-white.svg" alt="AFFiNE Logo" width="200" />
-</div>
-
 <p align="center">
   <a href="/README.md">English</a>
   | 
