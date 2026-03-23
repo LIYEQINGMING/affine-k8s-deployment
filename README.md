@@ -67,7 +67,29 @@ While AFFiNE provides an excellent Docker Compose guide, deploying it to a produ
 
 <br />
 
-# 💌 About AFFiNE
+# �️ Data Persistence & Disaster Recovery
+
+### Preventing Data Loss
+By default, deleting a namespace or a PersistentVolumeClaim (PVC) might result in the underlying PersistentVolume (PV) and its data being deleted. To prevent this:
+1. PVCs in this repository are annotated with `"helm.sh/resource-policy": keep`.
+2. **Crucial Step**: Ensure your StorageClass has `reclaimPolicy: Retain`.
+    ```bash
+    kubectl patch sc <your-storage-class> -p '{"reclaimPolicy":"Retain"}'
+    ```
+    For existing PVs:
+    ```bash
+    kubectl patch pv <your-pv-name> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
+    ```
+
+### Recovering Data
+If your namespace or PostgreSQL pod is deleted but the PV was retained:
+1. Re-apply the `k8s/02-storage.yaml`. New PVCs will be created.
+2. Manually copy the data from the old NFS path to the new NFS path created by the provisioner.
+3. Restart the pods.
+
+<br />
+
+# �💌 About AFFiNE
 
 To learn more about the AFFiNE application itself, please visit the official repositories:
 

@@ -65,6 +65,28 @@ AFFiNEは優れたDocker Composeガイドを提供していますが、本番環
 
 <br>
 
+# 🛡️ データの永続性と災害復旧
+
+### データ損失の防止
+デフォルトでは、名前空間または PersistentVolumeClaim (PVC) を削除すると、基盤となる PersistentVolume (PV) とそのデータも削除される可能性があります。これを防ぐには：
+1. このリポジトリの PVC には `"helm.sh/resource-policy": keep` アノテーションが設定されています。
+2. **重要な手順**: StorageClass の `reclaimPolicy` が `Retain` に設定されていることを確認してください。
+    ```bash
+    kubectl patch sc <your-storage-class> -p '{"reclaimPolicy":"Retain"}'
+    ```
+    既存の PV の場合：
+    ```bash
+    kubectl patch pv <your-pv-name> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
+    ```
+
+### データの復旧
+名前空間または PostgreSQL ポッドが削除されたが、PV が保持されている場合：
+1. `k8s/02-storage.yaml` を再適用します。新しい PVC と空の PV が作成されます。
+2. 古い PV のディレクトリから新しい PV のディレクトリへ、手動でデータをコピー/上書きします。
+3. ポッドを再起動してデータを読み込みます。
+
+<br>
+
 # 💌 AFFiNEについて
 AFFiNEアプリケーション自体の詳細については、公式リポジトリにアクセスしてください：
 

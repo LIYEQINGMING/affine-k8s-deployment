@@ -10,24 +10,26 @@
 
 <b>本项目提供了一套完整的 Kubernetes 资源清单和离线部署脚本，用于自托管部署 AFFiNE（一款开源的一体化工作空间）。支持标准的在线部署以及隔离网络（离线）环境部署。</b>
 
-<br>
+<br />
 
 ✨ 让 AFFiNE 的 Kubernetes 部署变得简单、标准化
 
-<br>
+<br />
 
 # 💌 我们为什么打造这套部署方案
+
 虽然 AFFiNE 官方提供了优秀的 Docker Compose 部署指南，但在生产级 Kubernetes 集群中部署，尤其是在无外网访问的隔离（内网）环境中，往往需要耗费大量精力。本项目旨在填补这一空白，提供一套生产就绪的 K8s 部署架构，并完美支持离线镜像管理。
 
-<br>
+<br />
 
 # ✨ 快速开始
 
 <a href="../k8s/README.md">在线部署指南</a> | <a href="../offline/README.md">内网离线部署指南</a>
 
-<br>
+<br />
 
 # 🔥 特性
+
 <table>
   <tr>
     <th>
@@ -63,15 +65,38 @@
   </tr>
 </table>
 
-<br>
+<br />
 
-# 💌 关于 AFFiNE
+# �️ 数据持久化与灾难恢复
+
+### 防止数据丢失
+默认情况下，删除命名空间或 PersistentVolumeClaim (PVC) 可能会导致底层的 PersistentVolume (PV) 及其数据被一并删除。为了防止这种情况：
+1. 本项目中的 PVC 已配置 `"helm.sh/resource-policy": keep` 注解。
+2. **关键步骤**：请确保你的 StorageClass 配置了 `reclaimPolicy: Retain`。
+    ```bash
+    kubectl patch sc <你的storage-class名称> -p '{"reclaimPolicy":"Retain"}'
+    ```
+    对于已经存在的 PV，请执行：
+    ```bash
+    kubectl patch pv <你的pv名称> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
+    ```
+
+### 数据恢复
+如果命名空间或 PostgreSQL 意外删除，但 PV 被保留了下来：
+1. 重新应用 `k8s/02-storage.yaml`，Kubernetes 会创建新的 PVC 和空 PV。
+2. 登录存储节点，将旧 PV 目录下的数据手动复制/覆盖到新 PV 对应的目录中。
+3. 重启相关 Pod 以加载数据。
+
+<br />
+
+# �💌 关于 AFFiNE
+
 了解更多关于 AFFiNE 应用程序本身的信息，请访问官方渠道：
 
-- 官方网站: [https://affine.pro](https://affine.pro)
+- 官方网站: <https://affine.pro>
 - GitHub 仓库: [toeverything/AFFiNE](https://github.com/toeverything/AFFiNE)
-- 官方文档: [https://docs.affine.pro](https://docs.affine.pro)
+- 官方文档: <https://docs.affine.pro>
 
-<br>
+<br />
 
 🙏 衷心感谢 AFFiNE 团队创造了如此出色的工作空间工具！本部署仓库致力于让 Kubernetes 用户能更轻松地拥有和管理属于自己的 AFFiNE 实例。🎉

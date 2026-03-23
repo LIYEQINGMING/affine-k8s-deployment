@@ -55,6 +55,27 @@ You have two ways to access the service:
     *   Use `http://<Ingress-Controller-IP>/`
     *   Since no host is specified in `06-ingress.yaml`, it will match any IP accessing the Ingress Controller.
 
+## Data Persistence & Disaster Recovery
+
+### Preventing Data Loss on Namespace Deletion
+By default, deleting a namespace or a PersistentVolumeClaim (PVC) might result in the underlying PersistentVolume (PV) and its data being deleted, depending on your StorageClass `reclaimPolicy` (which is often set to `Delete`).
+
+To prevent accidental data loss:
+1.  We have added `helm.sh/resource-policy: keep` annotations to the PVCs in `02-storage.yaml`. This helps if you ever migrate to Helm.
+2.  **Crucial Step**: Ensure your StorageClass `nfs-client-re` (or whichever you use) has `reclaimPolicy: Retain`. You can check this by running:
+    ```bash
+    kubectl get sc nfs-client-re
+    ```
+    If it says `Delete`, you should patch your PVs to retain data:
+    ```bash
+    kubectl patch pv <your-pv-name> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
+    ```
+
+### Recovering Data
+If your namespace or PostgreSQL pod is deleted but the PV was retained:
+1. Re-apply the `02-storage.yaml`. The new PVCs will be created.
+2. If the new PVCs create new empty PVs instead of binding to the old ones, you will need to manually map the old PVs to the new PVCs or copy the data from the old NFS path to the new NFS path created by the provisioner.
+
 ## Namespace
 
 All resources are deployed in the `affine` namespace. You can verify this by running:

@@ -6,6 +6,8 @@ metadata:
   labels:
     app: affine
     component: postgres
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   accessModes:
     - ReadWriteOnce
@@ -23,6 +25,8 @@ metadata:
   labels:
     app: affine
     component: server
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   accessModes:
     - ReadWriteOnce
@@ -40,6 +44,8 @@ metadata:
   labels:
     app: affine
     component: server
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   accessModes:
     - ReadWriteOnce

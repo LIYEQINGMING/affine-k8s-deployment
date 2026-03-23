@@ -65,6 +65,28 @@
 
 <br>
 
+# 🛡️ 資料持久化與災難復原
+
+### 防止資料遺失
+預設情況下，刪除命名空間或 PersistentVolumeClaim (PVC) 可能會導致底層的 PersistentVolume (PV) 及其資料被一併刪除。為了防止這種情況：
+1. 本專案中的 PVC 已配置 `"helm.sh/resource-policy": keep` 註解。
+2. **關鍵步驟**：請確保你的 StorageClass 配置了 `reclaimPolicy: Retain`。
+    ```bash
+    kubectl patch sc <你的storage-class名稱> -p '{"reclaimPolicy":"Retain"}'
+    ```
+    對於已經存在的 PV，請執行：
+    ```bash
+    kubectl patch pv <你的pv名稱> -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
+    ```
+
+### 資料復原
+如果命名空間或 PostgreSQL 意外刪除，但 PV 被保留了下來：
+1. 重新應用 `k8s/02-storage.yaml`，Kubernetes 會創建新的 PVC 和空 PV。
+2. 登入儲存節點，將舊 PV 目錄下的資料手動複製/覆蓋到新 PV 對應的目錄中。
+3. 重啟相關 Pod 以加載資料。
+
+<br>
+
 # 💌 關於 AFFiNE
 了解更多關於 AFFiNE 應用程式本身的資訊，請訪問官方管道：
 
